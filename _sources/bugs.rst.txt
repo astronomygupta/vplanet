@@ -1,0 +1,10 @@
+Bugs
+====
+
+Scripts to reproduce current major bugs in **VPLanet**.
+
+.. toctree::
+   :maxdepth: 1
+
+
+
