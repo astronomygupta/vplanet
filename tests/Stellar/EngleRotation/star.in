@@ -1,0 +1,20 @@
+# Engle23 Mid magnetic-braking model test — M3-like dwarf
+
+sName               star
+saModules           stellar
+
+dMass               0.3
+dRotPeriod          -10
+dAge                1e9
+
+sStellarModel       baraffe
+sXUVModel           RIBAS
+sMagBrakingModel    Engle23Mid
+
+# Engle & Guinan (2023) Mid coefficients — defaults, stated explicitly
+dRotEngleMidA        0.0561
+dRotEngleMidB       -0.8900
+dRotEngleMidC       -0.0521
+dRotEngleMidD      -24.1888
+
+saOutputOrder Time -Luminosity -RotPer -LXUVStellar

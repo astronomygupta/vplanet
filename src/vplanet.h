@@ -622,6 +622,30 @@ struct BODY {
   double dLuminosityFrequency;
   double dLuminosityPhase;
 
+  /* Engle (2024) XUV-evolution coefficients */
+  double dXUVEngleEarlyA;
+  double dXUVEngleEarlyB;
+  double dXUVEngleEarlyC;
+  double dXUVEngleEarlyD;
+  double dXUVEngleMidLateA;
+  double dXUVEngleMidLateB;
+  double dXUVEngleMidLateC;
+  double dXUVEngleMidLateD;
+
+  /* Engle & Guinan (2023) rotation-evolution coefficients */
+  double dRotEngleEarlyA;
+  double dRotEngleEarlyB;
+  double dRotEngleEarlyC;
+  double dRotEngleEarlyD;
+  double dRotEngleMidA;
+  double dRotEngleMidB;
+  double dRotEngleMidC;
+  double dRotEngleMidD;
+  double dRotEngleLateA;
+  double dRotEngleLateB;
+  double dRotEngleLateC;
+  double dRotEngleLateD;
+
   /* POISE parameters */
   int bPoise; /**< Apply POISE module? */
 
@@ -850,6 +874,14 @@ struct BODY {
   //                                  coefficient*/
   // double dFlareSlopeErrorLower; /**< Lower error of slope /FFD angular
   //                                  coefficient*/
+  double dFlareSlopeA1; /**< a1 in slope = a1*log10(age_Myr) + a2*M_sun + a3
+                             (Davenport+2019 variable-slope FFD)*/
+  double dFlareSlopeA2; /**< a2 coefficient; see dFlareSlopeA1 */
+  double dFlareSlopeA3; /**< a3 coefficient; see dFlareSlopeA1 */
+  double dFlareYIntB1;  /**< b1 in yint = b1*log10(age_Myr) + b2*M_sun + b3
+                             (Davenport+2019 variable-slope FFD)*/
+  double dFlareYIntB2;  /**< b2 coefficient; see dFlareYIntB1 */
+  double dFlareYIntB3;  /**< b3 coefficient; see dFlareYIntB1 */
   double dFlareMinEnergy; /**< Flare minimum energy value to calculate the FFD*/
   double dFlareMaxEnergy; /**< Flare maximum energy value to calculate the FFD*/
   double dFlareFreq1;     /**< First value of flare frequency range*/

@@ -1,0 +1,20 @@
+# Engle24 MidLate XUV model test — GJ 1132-like late M dwarf
+
+sName               star
+saModules           stellar
+
+dMass               0.181
+dRotPeriod          -122
+dAge                1e9
+
+sStellarModel       baraffe
+sXUVModel           Engle24MidLate
+sMagBrakingModel    reiners
+
+# Engle et al. (2024) MidLate coefficients — defaults, stated explicitly
+dXUVEngleMidLateA   -0.1456
+dXUVEngleMidLateB   -2.8876
+dXUVEngleMidLateC   -1.8187
+dXUVEngleMidLateD    0.3545
+
+saOutputOrder Time -Luminosity -LXUVStellar -LXUVTot

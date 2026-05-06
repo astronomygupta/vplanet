@@ -33,6 +33,31 @@ void BodyCopyStellar(BODY *dest, BODY *src, int foo, int iNumBodies,
   dest[iBody].dLuminosityAmplitude = src[iBody].dLuminosityAmplitude;
   dest[iBody].dLuminosityFrequency = src[iBody].dLuminosityFrequency;
   dest[iBody].dLuminosityPhase     = src[iBody].dLuminosityPhase;
+
+  dest[iBody].dXUVEngleEarlyA = src[iBody].dXUVEngleEarlyA;
+  dest[iBody].dXUVEngleEarlyB = src[iBody].dXUVEngleEarlyB;
+  dest[iBody].dXUVEngleEarlyC = src[iBody].dXUVEngleEarlyC;
+  dest[iBody].dXUVEngleEarlyD = src[iBody].dXUVEngleEarlyD;
+
+  dest[iBody].dXUVEngleMidLateA = src[iBody].dXUVEngleMidLateA;
+  dest[iBody].dXUVEngleMidLateB = src[iBody].dXUVEngleMidLateB;
+  dest[iBody].dXUVEngleMidLateC = src[iBody].dXUVEngleMidLateC;
+  dest[iBody].dXUVEngleMidLateD = src[iBody].dXUVEngleMidLateD;
+
+  dest[iBody].dRotEngleEarlyA = src[iBody].dRotEngleEarlyA;
+  dest[iBody].dRotEngleEarlyB = src[iBody].dRotEngleEarlyB;
+  dest[iBody].dRotEngleEarlyC = src[iBody].dRotEngleEarlyC;
+  dest[iBody].dRotEngleEarlyD = src[iBody].dRotEngleEarlyD;
+
+  dest[iBody].dRotEngleMidA = src[iBody].dRotEngleMidA;
+  dest[iBody].dRotEngleMidB = src[iBody].dRotEngleMidB;
+  dest[iBody].dRotEngleMidC = src[iBody].dRotEngleMidC;
+  dest[iBody].dRotEngleMidD = src[iBody].dRotEngleMidD;
+
+  dest[iBody].dRotEngleLateA = src[iBody].dRotEngleLateA;
+  dest[iBody].dRotEngleLateB = src[iBody].dRotEngleLateB;
+  dest[iBody].dRotEngleLateC = src[iBody].dRotEngleLateC;
+  dest[iBody].dRotEngleLateD = src[iBody].dRotEngleLateD;
 }
 
 /**************** STELLAR options ********************/
@@ -165,11 +190,18 @@ void ReadMagBrakingModel(BODY *body, CONTROL *control, FILES *files,
       body[iFile - 1].iMagBrakingModel = STELLAR_DJDT_MA15;
     } else if (!memcmp(sLower(cTmp), "br", 2)) {
       body[iFile - 1].iMagBrakingModel = STELLAR_DJDT_BR21;
+    } else if (!memcmp(sLower(cTmp), "engle23e", 8)) {
+      body[iFile - 1].iMagBrakingModel = STELLAR_DJDT_ENGLE23EARLY;
+    } else if (!memcmp(sLower(cTmp), "engle23m", 8)) {
+      body[iFile - 1].iMagBrakingModel = STELLAR_DJDT_ENGLE23MID;
+    } else if (!memcmp(sLower(cTmp), "engle23l", 8)) {
+      body[iFile - 1].iMagBrakingModel = STELLAR_DJDT_ENGLE23LATE;
     } else {
       if (control->Io.iVerbose >= VERBERR) {
         fprintf(stderr,
                 "ERROR: Unknown argument to %s: %s. Options are REINERS, "
-                "SKUMANICH, MATT, BREIMANN21 or NONE.\n",
+                "SKUMANICH, MATT, BREIMANN21, ENGLE23EARLY, ENGLE23MID, "
+                "ENGLE23LATE, or NONE.\n",
                 options->cName, cTmp);
       }
       LineExit(files->Infile[iFile].cIn, lTmp);
@@ -229,14 +261,19 @@ void ReadXUVModel(BODY *body, CONTROL *control, FILES *files, OPTIONS *options,
     } else if (!memcmp(sLower(cTmp), "re", 2)) {
       if (control->Io.iVerbose >= VERBINPUT) {
         fprintf(stderr, "WARNING: The REINERS XUV model has serious issues. "
-                        "The recommended model is RIBAS.\n");
+                        "The recommended models are RIBAS, ENGLE24EARLY, or "
+                        "ENGLE24MIDLATE.\n");
       }
       body[iFile - 1].iXUVModel = STELLAR_MODEL_REINERS;
+    } else if (!memcmp(sLower(cTmp), "engle24e", 8)) {
+      body[iFile - 1].iXUVModel = STELLAR_MODEL_ENGLE24EARLY;
+    } else if (!memcmp(sLower(cTmp), "engle24m", 8)) {
+      body[iFile - 1].iXUVModel = STELLAR_MODEL_ENGLE24MIDLATE;
     } else {
       if (control->Io.iVerbose >= VERBERR) {
         fprintf(stderr,
-                "ERROR: Unknown argument to %s: %s. Options are RIBAS, REINERS "
-                "or NONE.\n",
+                "ERROR: Unknown argument to %s: %s. Options are RIBAS, REINERS, "
+                "ENGLE24EARLY, ENGLE24MIDLATE, or NONE.\n",
                 options->cName, cTmp);
       }
       LineExit(files->Infile[iFile].cIn, lTmp);
@@ -394,6 +431,346 @@ void ReadLuminosityPhase(BODY *body, CONTROL *control, FILES *files,
     UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
   } else if (iFile > 0)
     body[iFile - 1].dLuminosityPhase = options->dDefault;
+}
+
+void ReadXUVEngleEarlyA(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleEarlyA = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleEarlyA = options->dDefault;
+  }
+}
+
+void ReadXUVEngleEarlyB(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleEarlyB = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleEarlyB = options->dDefault;
+  }
+}
+
+void ReadXUVEngleEarlyC(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleEarlyC = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleEarlyC = options->dDefault;
+  }
+}
+
+void ReadXUVEngleEarlyD(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleEarlyD = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleEarlyD = options->dDefault;
+  }
+}
+
+void ReadXUVEngleMidLateA(BODY *body, CONTROL *control, FILES *files,
+                          OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleMidLateA = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleMidLateA = options->dDefault;
+  }
+}
+
+void ReadXUVEngleMidLateB(BODY *body, CONTROL *control, FILES *files,
+                          OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleMidLateB = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleMidLateB = options->dDefault;
+  }
+}
+
+void ReadXUVEngleMidLateC(BODY *body, CONTROL *control, FILES *files,
+                          OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleMidLateC = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleMidLateC = options->dDefault;
+  }
+}
+
+void ReadXUVEngleMidLateD(BODY *body, CONTROL *control, FILES *files,
+                          OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dXUVEngleMidLateD = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dXUVEngleMidLateD = options->dDefault;
+  }
+}
+
+void ReadRotEngleEarlyA(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleEarlyA = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleEarlyA = options->dDefault;
+  }
+}
+
+void ReadRotEngleEarlyB(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleEarlyB = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleEarlyB = options->dDefault;
+  }
+}
+
+void ReadRotEngleEarlyC(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleEarlyC = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleEarlyC = options->dDefault;
+  }
+}
+
+void ReadRotEngleEarlyD(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleEarlyD = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleEarlyD = options->dDefault;
+  }
+}
+
+void ReadRotEngleMidA(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleMidA = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleMidA = options->dDefault;
+  }
+}
+
+void ReadRotEngleMidB(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleMidB = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleMidB = options->dDefault;
+  }
+}
+
+void ReadRotEngleMidC(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleMidC = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleMidC = options->dDefault;
+  }
+}
+
+void ReadRotEngleMidD(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleMidD = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleMidD = options->dDefault;
+  }
+}
+
+void ReadRotEngleLateA(BODY *body, CONTROL *control, FILES *files,
+                       OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleLateA = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleLateA = options->dDefault;
+  }
+}
+
+void ReadRotEngleLateB(BODY *body, CONTROL *control, FILES *files,
+                       OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleLateB = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleLateB = options->dDefault;
+  }
+}
+
+void ReadRotEngleLateC(BODY *body, CONTROL *control, FILES *files,
+                       OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleLateC = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleLateC = options->dDefault;
+  }
+}
+
+void ReadRotEngleLateD(BODY *body, CONTROL *control, FILES *files,
+                       OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dRotEngleLateD = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dRotEngleLateD = options->dDefault;
+  }
 }
 
 /* Halts */
@@ -635,6 +1012,286 @@ void InitializeOptionsStellar(OPTIONS *options, fnReadOption fnRead[]) {
   options[OPT_LUMPHASE].dNeg       = DEGRAD;
   fvFormattedString(&options[OPT_LUMPHASE].cNeg, "Degrees");
   fnRead[OPT_LUMPHASE] = &ReadLuminosityPhase;
+
+  iOpt = OPT_XUVENGLEEARLYA;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleEarlyA");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of a in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.4896");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.4896;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleEarlyA;
+
+  iOpt = OPT_XUVENGLEEARLYB;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleEarlyB");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of b in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-3.2128");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -3.2128;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleEarlyB;
+
+  iOpt = OPT_XUVENGLEEARLYC;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleEarlyC");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of c in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.4469");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.4469;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleEarlyC;
+
+  iOpt = OPT_XUVENGLEEARLYD;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleEarlyD");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of d in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.2985");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.2985;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleEarlyD;
+
+  iOpt = OPT_XUVENGLEMIDLATEA;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleMidLateA");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of a in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M2.6-6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.1456");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.1456;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleMidLateA;
+
+  iOpt = OPT_XUVENGLEMIDLATEB;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleMidLateB");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of b in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M2.6-6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-2.8876");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -2.8876;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleMidLateB;
+
+  iOpt = OPT_XUVENGLEMIDLATEC;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleMidLateC");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of c in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M2.6-6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-1.8187");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -1.8187;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleMidLateC;
+
+  iOpt = OPT_XUVENGLEMIDLATED;
+  fvFormattedString(&options[iOpt].cName, "dXUVEngleMidLateD");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of d in the Engle (2024) empirical age-XUV "
+                    "luminosity relationship for M2.6-6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "0.3545");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = 0.3545;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadXUVEngleMidLateD;
+
+  iOpt = OPT_ROTENGLEEARLYA;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleEarlyA");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of a in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "0.0621");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = 0.0621;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleEarlyA;
+
+  iOpt = OPT_ROTENGLEEARLYB;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleEarlyB");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of b in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-1.0437");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -1.0437;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleEarlyB;
+
+  iOpt = OPT_ROTENGLEEARLYC;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleEarlyC");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of c in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.0528");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.0528;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleEarlyC;
+
+  iOpt = OPT_ROTENGLEEARLYD;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleEarlyD");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of d in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M0-2 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-23.4933");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -23.4933;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleEarlyD;
+
+  iOpt = OPT_ROTENGLEMIDA;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleMidA");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of a in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M2.5-M3.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "0.0561");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = 0.0561;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleMidA;
+
+  iOpt = OPT_ROTENGLEMIDB;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleMidB");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of b in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M2.5-M3.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.8900");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.8900;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleMidB;
+
+  iOpt = OPT_ROTENGLEMIDC;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleMidC");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of c in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M2.5-M3.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.0521");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.0521;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleMidC;
+
+  iOpt = OPT_ROTENGLEMIDD;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleMidD");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of d in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M2.5-M3.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-24.1888");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -24.1888;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleMidD;
+
+  iOpt = OPT_ROTENGLELATEA;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleLateA");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of a in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M4-M6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "0.0251");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = 0.0251;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleLateA;
+
+  iOpt = OPT_ROTENGLELATEB;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleLateB");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of b in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M4-M6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.1615");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.1615;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleLateB;
+
+  iOpt = OPT_ROTENGLELATEC;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleLateC");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of c in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M4-M6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-0.0212");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -0.0212;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleLateC;
+
+  iOpt = OPT_ROTENGLELATED;
+  fvFormattedString(&options[iOpt].cName, "dRotEngleLateD");
+  fvFormattedString(&options[iOpt].cDescr,
+                    "Value of d in the Engle & Guinan (2023) empirical "
+                    "age-rotation relationship for M4-M6.5 dwarfs");
+  fvFormattedString(&options[iOpt].cDefault, "-25.45");
+  fvFormattedString(&options[iOpt].cDimension, "nd");
+  options[iOpt].dDefault   = -25.45;
+  options[iOpt].iType      = 2;
+  options[iOpt].bMultiFile = 1;
+  options[iOpt].iModuleBit = STELLAR;
+  options[iOpt].bNeg       = 0;
+  fnRead[iOpt]             = &ReadRotEngleLateD;
 }
 
 void ReadOptionsStellar(BODY *body, CONTROL *control, FILES *files,
@@ -1012,6 +1669,14 @@ void fnPropsAuxStellar(BODY *body, EVOLVE *evolve, IO *io, UPDATE *update,
       body[iBody].dLXUV = body[iBody].dSatXUVFrac * body[iBody].dLuminosity;
     }
 
+  } else if (body[iBody].iXUVModel == STELLAR_MODEL_ENGLE24EARLY) {
+    body[iBody].dLXUV = fdLXUVEngle(
+          body, body[iBody].dXUVEngleEarlyA, body[iBody].dXUVEngleEarlyB,
+          body[iBody].dXUVEngleEarlyC, body[iBody].dXUVEngleEarlyD, iBody);
+  } else if (body[iBody].iXUVModel == STELLAR_MODEL_ENGLE24MIDLATE) {
+    body[iBody].dLXUV = fdLXUVEngle(
+          body, body[iBody].dXUVEngleMidLateA, body[iBody].dXUVEngleMidLateB,
+          body[iBody].dXUVEngleMidLateC, body[iBody].dXUVEngleMidLateD, iBody);
   } else {
 
     // Constant XUV fraction
@@ -1025,6 +1690,13 @@ void fnForceBehaviorStellar(BODY *body, MODULE *module, EVOLVE *evolve, IO *io,
                             int iModule) {
   if (body[iBody].iStellarModel == STELLAR_MODEL_SINEWAVE) {
     body[iBody].dLXUV = body[iBody].dSatXUVFrac * body[iBody].dLuminosity;
+  }
+
+  if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23EARLY ||
+      body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23MID ||
+      body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23LATE) {
+    body[iBody].dRotPer  = fdRotationPeriodEngle(body, iBody);
+    body[iBody].dRotRate = fdPerToFreq(body[iBody].dRotPer);
   }
 }
 
@@ -1072,10 +1744,183 @@ void NullStellarDerivatives(BODY *body, EVOLVE *evolve, UPDATE *update,
   }
 }
 
+void VerifyTwoEngleOptionsNotSet(BODY *body, CONTROL *control, FILES *files,
+                                 OPTIONS *options, char cModel[OPTLEN],
+                                 int iOptionModel, int iOptionConstant,
+                                 int iBody) {
+  if (options[iOptionModel].iLine[iBody + 1] >= 0 &&
+      options[iOptionConstant].iLine[iBody + 1] >= 0) {
+    if (control->Io.iVerbose >= VERBERR) {
+      fprintf(stderr, "ERROR: Cannot set %s if %s is set to %s.\n",
+              options[iOptionConstant].cName, options[iOptionModel].cName,
+              cModel);
+    }
+    DoubleLineExit(files->Infile[iBody + 1].cIn, files->Infile[iBody + 1].cIn,
+                   options[iOptionConstant].iLine[iBody + 1],
+                   options[iOptionModel].iLine[iBody + 1]);
+  }
+}
+
+void VerifyEngleMassSpectralType(BODY *body, CONTROL *control, FILES *files,
+                                 OPTIONS *options, char cModel[LINE],
+                                 double dMaxMass, double dMinMass,
+                                 int iOptionModel, int iBody) {
+
+  if (body[iBody].dMass > dMaxMass * MSUN ||
+      body[iBody].dMass <= dMinMass * MSUN) {
+    if (control->Io.iVerbose >= VERBINPUT) {
+      fprintf(stderr,
+              "ERROR: Stellar mass must be between %.2e and %.2e solar "
+              "masses to use the %s model.",
+              dMinMass, dMaxMass, cModel);
+    }
+    DoubleLineExit(files->Infile[iBody + 1].cIn, files->Infile[iBody + 1].cIn,
+                   options[iOptionModel].iLine[iBody + 1],
+                   options[OPT_MASS].iLine[iBody + 1]);
+  }
+}
+
+void VerifyNoRotEngleEarlyOptions(BODY *body, CONTROL *control, FILES *files,
+                                  OPTIONS *options, char cModel[LINE],
+                                  int iBody) {
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEEARLYA, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEEARLYB, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEEARLYC, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEEARLYD, iBody);
+}
+
+void VerifyNoRotEngleMidOptions(BODY *body, CONTROL *control, FILES *files,
+                                OPTIONS *options, char cModel[LINE],
+                                int iBody) {
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEMIDA, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEMIDB, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEMIDC, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLEMIDD, iBody);
+}
+
+void VerifyNoRotEngleLateOptions(BODY *body, CONTROL *control, FILES *files,
+                                 OPTIONS *options, char cModel[LINE],
+                                 int iBody) {
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLELATEA, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLELATEB, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLELATEC, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_MAGBRAKINGMODEL, OPT_ROTENGLELATED, iBody);
+}
+
+void VerifyRotRateEngleEarly(BODY *body, CONTROL *control, FILES *files,
+                             OPTIONS *options, int iBody) {
+  char cModel[LINE] = "ENGLE23EARLY magnetic braking";
+  double dMinMass   = 0.4;
+  double dMaxMass   = 0.6;
+
+  VerifyEngleMassSpectralType(body, control, files, options, cModel, dMaxMass,
+                              dMinMass, OPT_MAGBRAKINGMODEL, iBody);
+  VerifyNoRotEngleMidOptions(body, control, files, options, cModel, iBody);
+  VerifyNoRotEngleLateOptions(body, control, files, options, cModel, iBody);
+}
+
+void VerifyRotRateEngleMid(BODY *body, CONTROL *control, FILES *files,
+                           OPTIONS *options, int iBody) {
+  char cModel[LINE] = "ENGLE23MID magnetic braking";
+  double dMinMass   = 0.2;
+  double dMaxMass   = 0.4;
+
+  VerifyEngleMassSpectralType(body, control, files, options, cModel, dMaxMass,
+                              dMinMass, OPT_MAGBRAKINGMODEL, iBody);
+  VerifyNoRotEngleEarlyOptions(body, control, files, options, cModel, iBody);
+  VerifyNoRotEngleLateOptions(body, control, files, options, cModel, iBody);
+}
+
+void VerifyRotRateEngleLate(BODY *body, CONTROL *control, FILES *files,
+                            OPTIONS *options, int iBody) {
+  char cModel[LINE] = "ENGLE23LATE magnetic braking";
+  double dMinMass   = 0.1;
+  double dMaxMass   = 0.2;
+
+  VerifyEngleMassSpectralType(body, control, files, options, cModel, dMaxMass,
+                              dMinMass, OPT_MAGBRAKINGMODEL, iBody);
+  VerifyNoRotEngleEarlyOptions(body, control, files, options, cModel, iBody);
+  VerifyNoRotEngleMidOptions(body, control, files, options, cModel, iBody);
+}
+
+void VerifyRotRateEngle(BODY *body, CONTROL *control, FILES *files,
+                        OPTIONS *options, int iBody) {
+  if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23EARLY) {
+    VerifyRotRateEngleEarly(body, control, files, options, iBody);
+  } else if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23MID) {
+    VerifyRotRateEngleMid(body, control, files, options, iBody);
+  } else if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23LATE) {
+    VerifyRotRateEngleLate(body, control, files, options, iBody);
+  }
+}
+
+void VerifyXUVEngleEarly(BODY *body, CONTROL *control, FILES *files,
+                         OPTIONS *options, int iBody) {
+  char cModel[LINE] = "ENGLE24EARLY XUV";
+  double dMinMass   = 0.4;
+  double dMaxMass   = 0.6;
+
+  VerifyEngleMassSpectralType(body, control, files, options, cModel, dMaxMass,
+                              dMinMass, OPT_XUVMODEL, iBody);
+
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEMIDLATEA, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEMIDLATEB, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEMIDLATEC, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEMIDLATED, iBody);
+}
+
+void VerifyXUVEngleMidLate(BODY *body, CONTROL *control, FILES *files,
+                           OPTIONS *options, int iBody) {
+  char cModel[LINE] = "ENGLE24MIDLATE XUV";
+  double dMinMass   = 0.1;
+  double dMaxMass   = 0.4;
+
+  VerifyEngleMassSpectralType(body, control, files, options, cModel, dMaxMass,
+                              dMinMass, OPT_XUVMODEL, iBody);
+
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEEARLYA, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEEARLYB, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEEARLYC, iBody);
+  VerifyTwoEngleOptionsNotSet(body, control, files, options, cModel,
+                              OPT_XUVMODEL, OPT_XUVENGLEEARLYD, iBody);
+}
+
+void VerifyXUVEngle(BODY *body, CONTROL *control, FILES *files,
+                    OPTIONS *options, int iBody) {
+  if (body[iBody].iXUVModel == STELLAR_MODEL_ENGLE24EARLY) {
+    VerifyXUVEngleEarly(body, control, files, options, iBody);
+  } else if (body[iBody].iXUVModel == STELLAR_MODEL_ENGLE24MIDLATE) {
+    VerifyXUVEngleMidLate(body, control, files, options, iBody);
+  }
+}
+
 void VerifyStellar(BODY *body, CONTROL *control, FILES *files, OPTIONS *options,
                    OUTPUT *output, SYSTEM *system, UPDATE *update, int iBody,
                    int iModule) {
   /* Stellar is active for this body if this subroutine is called. */
+
+  VerifyXUVEngle(body, control, files, options, iBody);
+  VerifyRotRateEngle(body, control, files, options, iBody);
+
 
   if (update[iBody].iNumLuminosity > 1) {
     if (control->Io.iVerbose >= VERBERR) {
@@ -2113,4 +2958,62 @@ double fdLuminosityFunctionSineWave(BODY *body, int iBody) {
               sin(body[iBody].dAge * body[iBody].dLuminosityFrequency +
                   body[iBody].dLuminosityPhase);
   return dLuminosity;
+}
+
+double fdRotationPeriodEngleGeneral(BODY *body, double dA, double dB, double dC,
+                                    double dD, int iBody) {
+  double dRotationPeriod;
+
+  double dMinRotPerInDays = 0.5;
+  double dRotPerInDays    = body[iBody].dRotPer / DAYSEC;
+  double dLogAgeInGyr     = log10(body[iBody].dAge / (1e9 * YEARSEC));
+  /* D is negative; -D is the rotation-period threshold (days) that selects
+     the two-branch fit in Engle & Guinan (2023). */
+  if (dRotPerInDays < -dD) {
+    dRotationPeriod = (dLogAgeInGyr - dB) / dA;
+  } else {
+    dRotationPeriod = (dLogAgeInGyr - (dB + dC * dD)) / (dA + dC);
+  }
+
+  if (dRotationPeriod < dMinRotPerInDays) {
+    dRotationPeriod = dMinRotPerInDays;
+  }
+
+  return dRotationPeriod * DAYSEC;
+}
+
+double fdRotationPeriodEngle(BODY *body, int iBody) {
+  double dRotationPeriod = body[iBody].dRotPer;
+
+  if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23EARLY) {
+    dRotationPeriod = fdRotationPeriodEngleGeneral(
+          body, body[iBody].dRotEngleEarlyA, body[iBody].dRotEngleEarlyB,
+          body[iBody].dRotEngleEarlyC, body[iBody].dRotEngleEarlyD, iBody);
+  } else if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23MID) {
+    dRotationPeriod = fdRotationPeriodEngleGeneral(
+          body, body[iBody].dRotEngleMidA, body[iBody].dRotEngleMidB,
+          body[iBody].dRotEngleMidC, body[iBody].dRotEngleMidD, iBody);
+  } else if (body[iBody].iMagBrakingModel == STELLAR_DJDT_ENGLE23LATE) {
+    dRotationPeriod = fdRotationPeriodEngleGeneral(
+          body, body[iBody].dRotEngleLateA, body[iBody].dRotEngleLateB,
+          body[iBody].dRotEngleLateC, body[iBody].dRotEngleLateD, iBody);
+  }
+
+  return dRotationPeriod;
+}
+
+double fdLXUVEngle(BODY *body, double dA, double dB, double dC, double dD,
+                   int iBody) {
+  double dLXUV;
+
+  double dAgeInGyr = body[iBody].dAge / (1.e9 * YEARSEC);
+  double dLogAge   = log10(dAgeInGyr);
+  if (dLogAge >= dD) {
+    dLXUV = pow(10., (dA * dLogAge + dB + dC * (dLogAge - dD)));
+  } else {
+    dLXUV = pow(10., (dA * dLogAge + dB));
+  }
+  dLXUV *= body[iBody].dLuminosity;
+
+  return dLXUV;
 }
