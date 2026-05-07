@@ -41,6 +41,10 @@
 #define STELLAR_MODEL_RIBAS 4
 #define STELLAR_MODEL_PROXIMACEN 5
 #define STELLAR_MODEL_SINEWAVE 6
+#define STELLAR_MODEL_ENGLE24EARLY                                             \
+  7 /**< XUV evolution from Engle (2024) for M0-M2 dwarfs */
+#define STELLAR_MODEL_ENGLE24MIDLATE                                           \
+  8 /**< XUV evolution from Engle (2024) for M2.6-M6.5 dwarfs */
 
 #define STELLAR_DJDT_NONE                                                      \
   0 /**< No stellar angular momentum loss via magnetic braking */
@@ -49,6 +53,12 @@
   2 /**< dJ/dt according to Skumanich 1972 empirical law */
 #define STELLAR_DJDT_MA15 3 /**< dJ/dt according to Matt+2015 */
 #define STELLAR_DJDT_BR21 4 /**< dJ/dt according to Breimann+2021 */
+#define STELLAR_DJDT_ENGLE23EARLY                                              \
+  5 /**< Rotation evolution from Engle & Guinan (2023) for M0-M2 dwarfs */
+#define STELLAR_DJDT_ENGLE23MID                                                \
+  6 /**< Rotation evolution from Engle & Guinan (2023) for M2.5-M3.5 dwarfs */
+#define STELLAR_DJDT_ENGLE23LATE                                               \
+  7 /**< Rotation evolution from Engle & Guinan (2023) for M4-M6.5 dwarfs */
 
 #define HZ_MODEL_KOPPARAPU 1
 #define DRYRGFLUX 415 /**< W/m^2 from Abe et al. (2011) */
@@ -76,6 +86,31 @@
 #define OPT_LUMAMPLITUDE 1550
 #define OPT_LUMPERIOD 1555
 #define OPT_LUMPHASE 1560
+
+#define OPT_XUVENGLEEARLYA 1570
+#define OPT_XUVENGLEEARLYB 1571
+#define OPT_XUVENGLEEARLYC 1572
+#define OPT_XUVENGLEEARLYD 1573
+
+#define OPT_XUVENGLEMIDLATEA 1574
+#define OPT_XUVENGLEMIDLATEB 1575
+#define OPT_XUVENGLEMIDLATEC 1576
+#define OPT_XUVENGLEMIDLATED 1577
+
+#define OPT_ROTENGLEEARLYA 1580
+#define OPT_ROTENGLEEARLYB 1581
+#define OPT_ROTENGLEEARLYC 1582
+#define OPT_ROTENGLEEARLYD 1583
+
+#define OPT_ROTENGLEMIDA 1584
+#define OPT_ROTENGLEMIDB 1585
+#define OPT_ROTENGLEMIDC 1586
+#define OPT_ROTENGLEMIDD 1587
+
+#define OPT_ROTENGLELATEA 1588
+#define OPT_ROTENGLELATEB 1589
+#define OPT_ROTENGLELATEC 1590
+#define OPT_ROTENGLELATED 1591
 
 /* Halt Functions */
 #define STELLARHALTSYSEND 5
@@ -187,6 +222,8 @@ double fdDEDtRotRadGyraStellar(BODY *, SYSTEM *, int *);
 double fdDEDtRotBrakeStellar(BODY *, SYSTEM *, int *);
 double fdDEDtStellar(BODY *, SYSTEM *, int *);
 double fdCranmerSaar2011TauCZ(double);
+double fdRotationPeriodEngle(BODY *, int);
+double fdLXUVEngle(BODY *, double, double, double, double, int);
 
 /* Dummy functions */
 double fdSurfEnFluxStellar(BODY *, SYSTEM *, UPDATE *, int, int);

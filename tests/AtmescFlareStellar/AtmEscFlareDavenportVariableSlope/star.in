@@ -1,0 +1,27 @@
+sName        star       # Body's name
+saModules    stellar flare
+
+# Physical Parameters
+dMass 0.12
+dAge          1e7
+
+# STELLAR parameters
+sStellarModel baraffe     # Stellar evolutin model: `baraffe` or `none`
+dSatXUVFrac   1.e-3          # Saturation level of the XUV luminosity
+dRadGyra      0.5
+
+dFlareMinEnergy           -1.0e33
+dFlareMaxEnergy           -1.0e36
+sFlareFFD                DAVENPORT
+sFlareBandPass     KEPLER
+
+# Variable-slope Davenport (2019) coefficients: non-default values chosen
+# from the GJ 1132 MCMC posterior mean so this test exercises the new path.
+dFlareSlopeA1   -0.1487
+dFlareSlopeA2    0.5167
+dFlareSlopeA3   -0.6160
+dFlareYIntB1     4.7077
+dFlareYIntB2   -16.4409
+dFlareYIntB3    19.3826
+
+saOutputOrder Time -LXUVFlare -LXUVStellar FlareSlopeOUT FlareYIntOUT

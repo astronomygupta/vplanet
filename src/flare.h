@@ -46,6 +46,13 @@
 #define OPT_FLAREBANDPASS 2041
 #define OPT_LXUVFLARECONST 2042
 
+#define OPT_FLARESLOPEA1 2043
+#define OPT_FLARESLOPEA2 2044
+#define OPT_FLARESLOPEA3 2045
+#define OPT_FLAREYINTB1 2046
+#define OPT_FLAREYINTB2 2047
+#define OPT_FLAREYINTB3 2048
+
 /* Output Functinos */
 
 /* FLARE 1900 - 1999 */
@@ -70,6 +77,10 @@
 #define OUT_FLAREENERGYMIN 2024
 #define OUT_FLAREENERGYMID 2025
 #define OUT_FLAREENERGYMAX 2026
+
+#define OUT_FLAREYINTOUT 2046
+#define OUT_FLARESLOPEOUT 2047
+
 /* @cond DOXYGEN_OVERRIDE */
 
 void InitializeControlFlare(CONTROL *);
@@ -137,6 +148,10 @@ void WriteFlareEnergyMid(BODY *, CONTROL *, OUTPUT *, SYSTEM *, UNITS *,
                          UPDATE *, int, double *, char**);
 void WriteFlareEnergyMax(BODY *, CONTROL *, OUTPUT *, SYSTEM *, UNITS *,
                          UPDATE *, int, double *, char**);
+void WriteFlareSlopeOUT(BODY *, CONTROL *, OUTPUT *, SYSTEM *, UNITS *,
+                        UPDATE *, int, double *, char**);
+void WriteFlareYIntOUT(BODY *, CONTROL *, OUTPUT *, SYSTEM *, UNITS *,
+                       UPDATE *, int, double *, char**);
 
 /* Logging Functions */
 void LogOptionsFlare(CONTROL *, FILE *);
@@ -148,6 +163,8 @@ void LogBodyFlare(BODY *, CONTROL *, OUTPUT *, SYSTEM *, UPDATE *,
 /* FLARE functions */
 double fdLXUVFlare(BODY *, double, int);
 double fdDavenport(double, double, double, double, double);
+double fdFlareSlopeOUT(BODY *, int);
+double fdFlareYIntOUT(BODY *, int);
 double fdFFD(BODY *, int, double, double, double);
 double fdBandPassKepler(BODY *, int, double);
 double fdBandPassXUV(BODY *, int, double);

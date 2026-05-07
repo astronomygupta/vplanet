@@ -26,6 +26,13 @@ void BodyCopyFlare(BODY *dest, BODY *src, int foo, int iNumBodies, int iBody) {
   dest[iBody].iEnergyBin = src[iBody].iEnergyBin;
   // dest[iBody].dFlareSlope      = src[iBody].dFlareSlope;
   //  dest[iBody].dFlareYInt       = src[iBody].dFlareYInt;
+
+  dest[iBody].dFlareSlopeA1 = src[iBody].dFlareSlopeA1;
+  dest[iBody].dFlareSlopeA2 = src[iBody].dFlareSlopeA2;
+  dest[iBody].dFlareSlopeA3 = src[iBody].dFlareSlopeA3;
+  dest[iBody].dFlareYIntB1  = src[iBody].dFlareYIntB1;
+  dest[iBody].dFlareYIntB2  = src[iBody].dFlareYIntB2;
+  dest[iBody].dFlareYIntB3  = src[iBody].dFlareYIntB3;
 }
 
 /**************** FLARE options ********************/
@@ -125,7 +132,7 @@ void ReadFlareBandPass(BODY *body,
       body[iFile - 1].iFlareBandPass = FLARE_UV;
     } else if (!memcmp(sLower(cTmp), "go", 2)) {
       body[iFile - 1].iFlareBandPass = FLARE_GOES;
-    } else if (!memcmp(sLower(cTmp), "sr", 2)) {
+    } else if (!memcmp(sLower(cTmp), "sx", 2)) {
       body[iFile - 1].iFlareBandPass = FLARE_SXR;
     } else if (!memcmp(sLower(cTmp), "te", 2)) {
       body[iFile - 1].iFlareBandPass = FLARE_TESS_UV;
@@ -317,6 +324,109 @@ void ReadFlareSlope(BODY *body, CONTROL *control, FILES *files,
     }
   }
 }
+
+void ReadFlareSlopeA1(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dFlareSlopeA1 = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dFlareSlopeA1 = options->dDefault;
+  }
+}
+
+void ReadFlareSlopeA2(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dFlareSlopeA2 = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dFlareSlopeA2 = options->dDefault;
+  }
+}
+
+void ReadFlareSlopeA3(BODY *body, CONTROL *control, FILES *files,
+                      OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dFlareSlopeA3 = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dFlareSlopeA3 = options->dDefault;
+  }
+}
+
+void ReadFlareYIntB1(BODY *body, CONTROL *control, FILES *files,
+                     OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dFlareYIntB1 = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dFlareYIntB1 = options->dDefault;
+  }
+}
+
+void ReadFlareYIntB2(BODY *body, CONTROL *control, FILES *files,
+                     OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dFlareYIntB2 = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dFlareYIntB2 = options->dDefault;
+  }
+}
+
+void ReadFlareYIntB3(BODY *body, CONTROL *control, FILES *files,
+                     OPTIONS *options, SYSTEM *system, int iFile) {
+  int lTmp = -1;
+  double dTmp;
+
+  AddOptionDouble(files->Infile[iFile].cIn, options->cName, &dTmp, &lTmp,
+                  control->Io.iVerbose);
+  if (lTmp >= 0) {
+    NotPrimaryInput(iFile, options->cName, files->Infile[iFile].cIn, lTmp,
+                    control->Io.iVerbose);
+    body[iFile - 1].dFlareYIntB3 = dTmp;
+    UpdateFoundOption(&files->Infile[iFile], options, lTmp, iFile);
+  } else if (iFile > 0) {
+    body[iFile - 1].dFlareYIntB3 = options->dDefault;
+  }
+}
+
 
 
 // TODO: Include the error in the FFD slopes to calculate the upper and higher
@@ -618,6 +728,90 @@ void InitializeOptionsFlare(OPTIONS *options, fnReadOption fnRead[]) {
             "MIN for number of flares per minutes, \n"
             " HOUR for number of flares per hour, and DAY number of flares per "
             "for days.\n");*/
+
+  fvFormattedString(&options[OPT_FLARESLOPEA1].cName, "dFlareSlopeA1");
+  fvFormattedString(&options[OPT_FLARESLOPEA1].cDescr,
+                    "a1 coefficient in Davenport (2019) variable-slope FFD: "
+                    "slope = a1*log10(age_Myr) + a2*M_sun + a3");
+  fvFormattedString(&options[OPT_FLARESLOPEA1].cDefault,
+                    "-0.07 (Davenport+2019 M-dwarf fit)");
+  options[OPT_FLARESLOPEA1].dDefault   = -0.07;
+  options[OPT_FLARESLOPEA1].iType      = 2;
+  options[OPT_FLARESLOPEA1].bMultiFile = 1;
+  options[OPT_FLARESLOPEA1].iModuleBit = FLARE;
+  options[OPT_FLARESLOPEA1].bNeg       = 0;
+  fvFormattedString(&options[OPT_FLARESLOPEA1].cDimension, "nd");
+  fnRead[OPT_FLARESLOPEA1]             = &ReadFlareSlopeA1;
+
+  fvFormattedString(&options[OPT_FLARESLOPEA2].cName, "dFlareSlopeA2");
+  fvFormattedString(&options[OPT_FLARESLOPEA2].cDescr,
+                    "a2 coefficient in Davenport (2019) variable-slope FFD; "
+                    "see dFlareSlopeA1");
+  fvFormattedString(&options[OPT_FLARESLOPEA2].cDefault,
+                    "0.79 (Davenport+2019 M-dwarf fit)");
+  options[OPT_FLARESLOPEA2].dDefault   = 0.79;
+  options[OPT_FLARESLOPEA2].iType      = 2;
+  options[OPT_FLARESLOPEA2].bMultiFile = 1;
+  options[OPT_FLARESLOPEA2].iModuleBit = FLARE;
+  options[OPT_FLARESLOPEA2].bNeg       = 0;
+  fvFormattedString(&options[OPT_FLARESLOPEA2].cDimension, "nd");
+  fnRead[OPT_FLARESLOPEA2]             = &ReadFlareSlopeA2;
+
+  fvFormattedString(&options[OPT_FLARESLOPEA3].cName, "dFlareSlopeA3");
+  fvFormattedString(&options[OPT_FLARESLOPEA3].cDescr,
+                    "a3 coefficient in Davenport (2019) variable-slope FFD; "
+                    "see dFlareSlopeA1");
+  fvFormattedString(&options[OPT_FLARESLOPEA3].cDefault,
+                    "-1.06 (Davenport+2019 M-dwarf fit)");
+  options[OPT_FLARESLOPEA3].dDefault   = -1.06;
+  options[OPT_FLARESLOPEA3].iType      = 2;
+  options[OPT_FLARESLOPEA3].bMultiFile = 1;
+  options[OPT_FLARESLOPEA3].iModuleBit = FLARE;
+  options[OPT_FLARESLOPEA3].bNeg       = 0;
+  fvFormattedString(&options[OPT_FLARESLOPEA3].cDimension, "nd");
+  fnRead[OPT_FLARESLOPEA3]             = &ReadFlareSlopeA3;
+
+  fvFormattedString(&options[OPT_FLAREYINTB1].cName, "dFlareYIntB1");
+  fvFormattedString(&options[OPT_FLAREYINTB1].cDescr,
+                    "b1 coefficient in Davenport (2019) variable-slope FFD: "
+                    "yint = b1*log10(age_Myr) + b2*M_sun + b3");
+  fvFormattedString(&options[OPT_FLAREYINTB1].cDefault,
+                    "2.01 (Davenport+2019 M-dwarf fit)");
+  options[OPT_FLAREYINTB1].dDefault   = 2.01;
+  options[OPT_FLAREYINTB1].iType      = 2;
+  options[OPT_FLAREYINTB1].bMultiFile = 1;
+  options[OPT_FLAREYINTB1].iModuleBit = FLARE;
+  options[OPT_FLAREYINTB1].bNeg       = 0;
+  fvFormattedString(&options[OPT_FLAREYINTB1].cDimension, "nd");
+  fnRead[OPT_FLAREYINTB1]             = &ReadFlareYIntB1;
+
+  fvFormattedString(&options[OPT_FLAREYINTB2].cName, "dFlareYIntB2");
+  fvFormattedString(&options[OPT_FLAREYINTB2].cDescr,
+                    "b2 coefficient in Davenport (2019) variable-slope FFD; "
+                    "see dFlareYIntB1");
+  fvFormattedString(&options[OPT_FLAREYINTB2].cDefault,
+                    "-25.15 (Davenport+2019 M-dwarf fit)");
+  options[OPT_FLAREYINTB2].dDefault   = -25.15;
+  options[OPT_FLAREYINTB2].iType      = 2;
+  options[OPT_FLAREYINTB2].bMultiFile = 1;
+  options[OPT_FLAREYINTB2].iModuleBit = FLARE;
+  options[OPT_FLAREYINTB2].bNeg       = 0;
+  fvFormattedString(&options[OPT_FLAREYINTB2].cDimension, "nd");
+  fnRead[OPT_FLAREYINTB2]             = &ReadFlareYIntB2;
+
+  fvFormattedString(&options[OPT_FLAREYINTB3].cName, "dFlareYIntB3");
+  fvFormattedString(&options[OPT_FLAREYINTB3].cDescr,
+                    "b3 coefficient in Davenport (2019) variable-slope FFD; "
+                    "see dFlareYIntB1");
+  fvFormattedString(&options[OPT_FLAREYINTB3].cDefault,
+                    "33.99 (Davenport+2019 M-dwarf fit)");
+  options[OPT_FLAREYINTB3].dDefault   = 33.99;
+  options[OPT_FLAREYINTB3].iType      = 2;
+  options[OPT_FLAREYINTB3].bMultiFile = 1;
+  options[OPT_FLAREYINTB3].iModuleBit = FLARE;
+  options[OPT_FLAREYINTB3].bNeg       = 0;
+  fvFormattedString(&options[OPT_FLAREYINTB3].cDimension, "nd");
+  fnRead[OPT_FLAREYINTB3]             = &ReadFlareYIntB3;
 }
 
 void ReadOptionsFlare(BODY *body,
@@ -1006,6 +1200,20 @@ void WriteLXUVFlare(BODY *body,
     *dTmp /= fdUnitsEnergyFlux(units->iTime, units->iMass, units->iLength);
     fsUnitsEnergyFlux(units, cUnit);
   }
+}
+
+void WriteFlareSlopeOUT(BODY *body, CONTROL *control, OUTPUT *output,
+                        SYSTEM *system, UNITS *units, UPDATE *update,
+                        int iBody, double *dTmp, char **cUnit) {
+  *dTmp = fdFlareSlopeOUT(body, iBody);
+  fvFormattedString(cUnit, "");
+}
+
+void WriteFlareYIntOUT(BODY *body, CONTROL *control, OUTPUT *output,
+                       SYSTEM *system, UNITS *units, UPDATE *update,
+                       int iBody, double *dTmp, char **cUnit) {
+  *dTmp = fdFlareYIntOUT(body, iBody);
+  fvFormattedString(cUnit, "");
 }
 
 // TODO: Include the error in the FFD slopes to calculate the upper and higher
@@ -1455,6 +1663,22 @@ void InitializeOutputFlare(OUTPUT *output, fnWriteOutput fnWrite[]) {
   output[OUT_LXUVFLARE].iModuleBit = FLARE;
   fnWrite[OUT_LXUVFLARE]           = &WriteLXUVFlare;
 
+  fvFormattedString(&output[OUT_FLARESLOPEOUT].cName, "FlareSlopeOUT");
+  fvFormattedString(&output[OUT_FLARESLOPEOUT].cDescr,
+                    "Instantaneous Davenport FFD slope at current age and mass");
+  output[OUT_FLARESLOPEOUT].bNeg       = 0;
+  output[OUT_FLARESLOPEOUT].iNum       = 1;
+  output[OUT_FLARESLOPEOUT].iModuleBit = FLARE;
+  fnWrite[OUT_FLARESLOPEOUT]           = &WriteFlareSlopeOUT;
+
+  fvFormattedString(&output[OUT_FLAREYINTOUT].cName, "FlareYIntOUT");
+  fvFormattedString(&output[OUT_FLAREYINTOUT].cDescr,
+                    "Instantaneous Davenport FFD y-intercept at current age and mass");
+  output[OUT_FLAREYINTOUT].bNeg       = 0;
+  output[OUT_FLAREYINTOUT].iNum       = 1;
+  output[OUT_FLAREYINTOUT].iModuleBit = FLARE;
+  fnWrite[OUT_FLAREYINTOUT]           = &WriteFlareYIntOUT;
+
   // TODO: Include the error in the FFD slopes to calculate the upper and higher
   // limit of XUV luminosity by flares
   /*fvFormattedString(output[OUT_LXUVFLAREUPPER].cName, "LXUVFlareUpper");
@@ -1642,6 +1866,25 @@ double fdDavenport(double dA1, double dA2, double dA3, double dStarAge,
 
   return dA;
 }
+
+/* Instantaneous Davenport FFD slope for the current age and mass, evaluated
+   from the body's variable-slope coefficients. Computed on demand so that
+   output does not require storing redundant state. */
+double fdFlareSlopeOUT(BODY *body, int iBody) {
+  return fdDavenport(body[iBody].dFlareSlopeA1,
+                     body[iBody].dFlareSlopeA2,
+                     body[iBody].dFlareSlopeA3,
+                     body[iBody].dAge, body[iBody].dMass);
+}
+
+/* Instantaneous Davenport FFD y-intercept for the current age and mass. */
+double fdFlareYIntOUT(BODY *body, int iBody) {
+  return fdDavenport(body[iBody].dFlareYIntB1,
+                     body[iBody].dFlareYIntB2,
+                     body[iBody].dFlareYIntB3,
+                     body[iBody].dAge, body[iBody].dMass);
+}
+
 // fdFFD calculates FFD of the flares. If LACY mode is choosen, them fdFFD has
 // to convert from SI to the units that the equation 3 from Davenport et al.
 // 2019 understand (i.e., flares/day and flares/(day*log10(erg))).
@@ -1695,14 +1938,17 @@ double fdLXUVFlare(BODY *body, double dDeltaTime, int iBody) {
   //  slopes(constant)?##################################
 
   if (body[iBody].iFlareFFD == FLARE_FFD_DAVENPORT) {
-    // The coefficient values given here were given by Dr. James Davenport in
-    // private comunication
-    dFlareSlope =
-          fdDavenport(-0.07, 0.79, -1.06, body[iBody].dAge,
-                      body[iBody].dMass); //(-0.07054598,0.81225239,-1.07054511)
-    dFlareYInt = fdDavenport(
-          2.01, -25.15, 33.99, body[iBody].dAge,
-          body[iBody].dMass); //(2.06012734,-25.79885288,34.44115635)
+    /* Davenport+2019 variable-slope FFD: slope and y-intercept are each
+       third-order fits in log10(age_Myr) with a linear mass term. The six
+       coefficients default to Davenport et al.'s published M-dwarf values. */
+    dFlareSlope = fdDavenport(body[iBody].dFlareSlopeA1,
+                              body[iBody].dFlareSlopeA2,
+                              body[iBody].dFlareSlopeA3,
+                              body[iBody].dAge, body[iBody].dMass);
+    dFlareYInt  = fdDavenport(body[iBody].dFlareYIntB1,
+                              body[iBody].dFlareYIntB2,
+                              body[iBody].dFlareYIntB3,
+                              body[iBody].dAge, body[iBody].dMass);
   } else if (body[iBody].iFlareFFD == FLARE_FFD_LACY) {
     dFlareSlope = body[iBody].dFlareSlope;
     dFlareYInt  = body[iBody].dFlareYInt;
